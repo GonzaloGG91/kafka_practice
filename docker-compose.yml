@@ -1,0 +1,38 @@
+services:
+  zookeeper: #name can be changed, but kept
+    image: confluentinc/cp-zookeeper:7.2.2 #this needs to be kept
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 5s
+      retries: 5
+
+  kafka: #name can be change but kept later on
+    image: confluentinc/cp-kafka:7.2.2 #stays
+    
+    depends_on:
+      - zookeeper #can be changed accordingly
+    ports:
+      - "9092:9092"
+    environment:
+      # depends on the needs
+        # small setup/testing: 1 broker is fine
+        # Production/ fault-tolerant:3 brokers minimum
+        # High Volume, scalable production: 5-7 brokers or more
+      KAFKA_BROKER_ID: 1 
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181 #change accordingly
+      # Important: define mapping between listener names and protocols
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+
+      # Advertise both: one for internal docker ("kafka"), one for host ("localhost"). the external failed so it was change
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    deploy:
+      resources:
+        limits:
+          memory: 1g

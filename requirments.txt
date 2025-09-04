@@ -1,0 +1,16 @@
+#In yml you can't do underscore 
+docker-compose up -d
+docker ps
+
+# Create topic use the name that I can see in docker ps for the kafka
+docker exec -it <practicepipelines-kafka-1> kafka-topics --create --topic athlete-events --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+# List topics
+docker exec -it <practicepipelines-kafka-1> kafka-topics --list --bootstrap-server localhost:9092
+
+
+# Terminal 1: Console producer
+docker exec -it practicepipelines-kafka-1 kafka-console-producer --topic athlete-events --bootstrap-server localhost:9092
+
+# Terminal 2: Console consumer
+bin/kafka-console-consumer.sh --topic athlete-events --from-beginning --bootstrap-server localhost:9092
